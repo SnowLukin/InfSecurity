@@ -123,12 +123,53 @@ void lab2task1() {
     outputFile.close();
 }
 
+vector<string> generateGrayCode(int n) {
+    if (n == 0) {
+        return {"0"};
+    } else if (n == 1) {
+        return {"0", "1"};
+    }
+    
+    vector<string> prevN = generateGrayCode(n - 1);
+    vector<string> result;
+    
+    for (int i = 0; i < prevN.size(); i++) {
+        string s = prevN[i];
+        result.push_back("0" + s);
+    }
+    
+    for (int i = prevN.size() - 1; i >= 0; i--) {
+        string s = prevN[i];
+        result.push_back("1" + s);
+    }
+    return result;
+}
+
 // MARK: - Lab 3
+void lab3task1() {
+    int n;
+    cout << "N: ";
+    cin >> n;
+    
+    string fileName("/Users/snowlukin/Desktop/InfSecurity/InfSecurity/InfSecurity/Lab3_Output.txt");
+    ofstream outputFile(fileName);
+    if (!outputFile.is_open()) {
+        cout << "Failed opening the file." << endl;
+        return;
+    }
+    
+    vector<string> result = generateGrayCode(n);
+    
+    for (int i = 0; i < result.size(); i++) {
+        outputFile << result[i] << " ";
+    }
+}
 
 
 // MARK: - Main Function
 int main(int argc, const char * argv[]) {
 //    lab1task1();
-    lab2task1();
+//    lab2task1();
+    lab3task1();
     return 0;
 }

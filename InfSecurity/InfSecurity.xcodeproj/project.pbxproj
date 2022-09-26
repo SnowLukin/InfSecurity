@@ -26,6 +26,7 @@
 		D750070B28CA23F900B8FDA0 /* InfSecurity */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = InfSecurity; sourceTree = BUILT_PRODUCTS_DIR; };
 		D750070E28CA23F900B8FDA0 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		D77B70F528E1CCF500B55DF2 /* Lab2_Output.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lab2_Output.txt; sourceTree = "<group>"; };
+		D77B70F628E1D76500B55DF2 /* Lab3_Output.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lab3_Output.txt; sourceTree = "<group>"; };
 		D7A612E728E1C9C200511138 /* Lab2_Input.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lab2_Input.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -62,6 +63,7 @@
 				D750070E28CA23F900B8FDA0 /* main.cpp */,
 				D7A612E728E1C9C200511138 /* Lab2_Input.txt */,
 				D77B70F528E1CCF500B55DF2 /* Lab2_Output.txt */,
+				D77B70F628E1D76500B55DF2 /* Lab3_Output.txt */,
 			);
 			path = InfSecurity;
 			sourceTree = "<group>";
@@ -93,7 +95,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastUpgradeCheck = 1340;
+				LastUpgradeCheck = 1400;
 				TargetAttributes = {
 					D750070A28CA23F900B8FDA0 = {
 						CreatedOnToolsVersion = 13.4.1;
@@ -163,6 +165,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -221,6 +224,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -242,7 +246,9 @@
 		D750071328CA23F900B8FDA0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = AUP52MS6LU;
 				ENABLE_HARDENED_RUNTIME = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -252,7 +258,9 @@
 		D750071428CA23F900B8FDA0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = AUP52MS6LU;
 				ENABLE_HARDENED_RUNTIME = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
