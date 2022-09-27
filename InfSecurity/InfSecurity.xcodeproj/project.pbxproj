@@ -27,6 +27,7 @@
 		D750070E28CA23F900B8FDA0 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		D77B70F528E1CCF500B55DF2 /* Lab2_Output.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lab2_Output.txt; sourceTree = "<group>"; };
 		D77B70F628E1D76500B55DF2 /* Lab3_Output.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lab3_Output.txt; sourceTree = "<group>"; };
+		D77B70FC28E2F5D000B55DF2 /* Lab4_Output.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lab4_Output.txt; sourceTree = "<group>"; };
 		D7A612E728E1C9C200511138 /* Lab2_Input.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lab2_Input.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -64,6 +65,7 @@
 				D7A612E728E1C9C200511138 /* Lab2_Input.txt */,
 				D77B70F528E1CCF500B55DF2 /* Lab2_Output.txt */,
 				D77B70F628E1D76500B55DF2 /* Lab3_Output.txt */,
+				D77B70FC28E2F5D000B55DF2 /* Lab4_Output.txt */,
 			);
 			path = InfSecurity;
 			sourceTree = "<group>";
