@@ -18,7 +18,11 @@ vector<vector<set<string>>> A; // матрица прав доступа
 int n, m;
 
 void createObject(int at) {
-    A.insert(A.begin() + at, vector<set<string>>(m, set<string>()));
+    vector<set<string>> v(m, set<string>());
+    for(unsigned i = 0; i < m; i++) {
+        v.insert(v.begin() + i, {"ro"}); // Could be anything
+    }
+    A.insert(A.begin() + at, v);
 }
 
 void destroyObject(int at) {
@@ -27,7 +31,9 @@ void destroyObject(int at) {
 
 void createSubject(int at) {
     for (int i = 0; i < A.size(); i++) {
-        A[i].insert(A[i].begin() + at, set<string>());
+        set<string> sub = {"ro"}; // Could be anything
+        
+        A[i].insert(A[i].begin() + at, sub);
     }
 }
 
@@ -183,8 +189,6 @@ int main(int argc, const char * argv[]) {
     
     ofstream rzltFile("/Users/snowlukin/Desktop/InfSecurity/ISLab7/ISLab7/rzlt.txt");
     string rzltLine;
-    
-    bool flag = true;
     
     for(int i = 0; i < A.size(); i++) {
         rzltLine = "";

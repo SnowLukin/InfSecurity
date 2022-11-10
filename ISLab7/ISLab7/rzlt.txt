@@ -1,7 +1,8 @@
-rox w wox rx rox r wx wx ro 
-x rx wox x rwo rwx rwx rx rwx 
-rwox rw wox rwo x wox rw wox 
-wox wx x wo wo wox wox rw rox 
-rwx wox wx x rwo wox x wox rw 
-rwo ro rx wox x rox rwo ox x 
-rwx r rw w rwx o x ox ox rw 
+rox w wox rx rx rox ro r wx wx ro 
+rwox rx rwo ro rx rwo ro x o rwo wox 
+x rx wox x ox rwo ro rwx rwx rx rwx 
+rwox rw wox r wo rwo ro x wox rw wox 
+wox wx x wo wx wo ro wox wox rw rox 
+rwx wox wx x w rwo ro wox x wox rw 
+rwo ro rx wox wo x ro rox rwo ox x 
+rwx rw w rwx r o ro x ox ox rw 
