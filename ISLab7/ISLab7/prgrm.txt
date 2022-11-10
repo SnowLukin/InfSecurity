@@ -1,0 +1,12 @@
+cds = 'S-' image_4
+ccs = 'S+' image_6
+cdr = 'r+' image_7 image_10
+ccs = 'S+' image_5
+cdo = 'O-' image_1
+cco = 'O+' image_3
+cdr = 'r-' image_4 image_3
+cco = 'O+' image_6
+cco = 'O+' image_7
+cds = 'S-' image_7
+cdr = 'o-' image_7 image_9
+if o in A[i,j] then 'o-' image_9 image_4 '-' cdr
