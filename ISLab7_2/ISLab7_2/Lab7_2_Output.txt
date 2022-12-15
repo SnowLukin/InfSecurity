@@ -1,0 +1,5 @@
+3
+5
+r w w _ _ 
+w rw r _ r 
+_ w rw rw rw 

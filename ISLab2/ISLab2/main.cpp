@@ -13,6 +13,14 @@
 
 using namespace std;
 
+int getVectorSum(vector<int> combination) {
+    int sum = 0;
+    for(int i = 0; i < combination.size(); i++) {
+        sum += combination[i];
+    }
+    return sum;
+}
+
 void getSubCombinations(vector<int> arg, vector<int> codes, vector<vector<int>> &result) {
     for(int i = 0; i < codes.size(); i++) {
         vector<int> sub = arg;
@@ -43,8 +51,19 @@ vector<vector<int>> getCombinations(vector<int> codes) {
     return result;
 }
 
+vector<vector<int>> getFilteredCombinations(vector<vector<int>> combinations, int numberToCrit) {
+    vector<vector<int>> filteredCombinations;
+    for(int i = 0; i < combinations.size(); i++) {
+        if (getVectorSum(combinations[i]) % numberToCrit == 0) {
+            filteredCombinations.push_back(combinations[i]);
+        }
+    }
+    
+    return filteredCombinations;
+}
+
 void lab2task1() {
-    string fileName("/Users/snowlukin/Desktop/InfSecurity/InfSecurity/InfSecurity/Lab2_Input.txt"); // Change path
+    string fileName("/Users/snowlukin/Desktop/InfSecurity/ISLab2/ISLab2/Lab2_Input.txt");
     vector<int> codes;
     int code;
     int numberToCrit;
@@ -62,19 +81,10 @@ void lab2task1() {
     inputFile.close();
     
     vector<vector<int>> combinations = getCombinations(codes);
-    vector<vector<int>> filteredCombinations;
-    for(int i = 0; i < combinations.size(); i++) {
-        int sum = 0;
-        for(int j = 0; j < combinations[i].size(); j++) {
-            sum += combinations[i][j];
-        }
-        if (sum % numberToCrit == 0) {
-            filteredCombinations.push_back(combinations[i]);
-        }
-    }
+    vector<vector<int>> filteredCombinations = getFilteredCombinations(combinations, numberToCrit);
     
     // Writing the results to the file
-    ofstream outputFile("/Users/snowlukin/Desktop/InfSecurity/InfSecurity/InfSecurity/Lab2_Output.txt"); // Change path
+    ofstream outputFile("/Users/snowlukin/Desktop/InfSecurity/ISLab2/ISLab2/Lab2_Output.txt");
     if (!outputFile.is_open()) {
         cout << "Coult not open output file." << endl;
         return;

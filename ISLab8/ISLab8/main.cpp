@@ -7,253 +7,343 @@
 
 #include <iostream>
 #include <vector>
-#include <string.h>
-#include <fstream>
 #include <set>
-#include <sstream>
-#include <math.h>
+#include <string.h>
 
 using namespace std;
 
-
-struct cell {
-    int subj_i;
-    int obj_j;
-    string value;
+class Matrix {
+private:
+    vector<vector<pair<int, set<string>>>> values;
+    int w, h;
+    
+public:
+    Matrix(int w, int h) {
+        this->values = vector<vector<pair<int, set<string>>>>(h, vector<pair<int, set<string>>>());
+        this->w = w;
+        this->h = h;
+    }
+    
+    int getWidth() {
+        return w;
+    }
+    
+    int getHeight() {
+        return h;
+    }
+    
+    set<string> get(int objIndex, int subjIndex) {
+        if (objIndex < 0 || objIndex >= w || subjIndex < 0 || subjIndex >= h) { return set<string>(); }
+        
+        for(int i = 0; i < values[subjIndex].size(); i++) {
+            if (values[subjIndex][i].first == objIndex) return values[subjIndex][i].second;
+        }
+        
+        return set<string>();
+    }
+    
+    void changeRule(int objIndex, int subjIndex, string rule, bool isRemoving) {
+        if (objIndex < 0 || objIndex >= w || subjIndex < 0 || subjIndex >= h) { return; }
+        
+        for(int i = 0; i < values[subjIndex].size(); i++) {
+            if (values[subjIndex][i].first == objIndex) {
+                if (isRemoving) {
+                    values[subjIndex][i].second.erase(rule);
+                    
+                    if (values[subjIndex][i].second.size() == 0) {
+                        values[subjIndex].erase(values[subjIndex].begin() + i);
+                    }
+                } else {
+                    values[subjIndex][i].second.insert(rule);
+                }
+                return;
+            }
+        }
+        
+        if (!isRemoving) {
+            values[subjIndex].push_back(pair<int, set<string>>(objIndex, set<string>()));
+            values[subjIndex][values[subjIndex].size() - 1].second.insert(rule);
+        }
+    }
+    
+    void addObject(string name) {
+        values.push_back(vector<pair<int, set<string>>>());
+        h++;
+        cout << "Object " + name + " was registered with id " << h << endl;
+    }
+    
+    void addSubject(string name) {
+        w++;
+        cout << "Subject " + name + " was registered with id " << w << endl;
+    }
+    
+    void deleteObject(int at) {
+        values[at] = vector<pair<int, set<string>>>();
+    }
+    
+    void deleteSubject(int at) {
+        for (int i = 0; i < values.size(); i++) {
+            for(int j = 0; j < values[i].size(); j++) {
+                if (values[i][j].first == at) {
+                    values[i].erase(values[i].begin() + j);
+                }
+            }
+        }
+    }
+    
+    float precent() {
+        float totalCount = w * h;
+        float currentCount = 0;
+        for(int i = 0; i < values.size(); i++) {
+            currentCount += values[i].size();
+        }
+        
+        return currentCount / totalCount;
+    }
+    
+    set<int> hasRule(int objIndex) {
+        set<int> result = set<int>();
+        
+        for(int i = 0; i < values[objIndex].size(); i++) {
+            result.insert(values[objIndex][i].first);
+        }
+        
+        return result;
+    }
+    
+    void print() {
+        for(int objIndex = 0; objIndex < h; objIndex++) {
+            for(int subjIndex = 0; subjIndex < w; subjIndex++) {
+                set<string> rules = get(objIndex, subjIndex);
+                
+                if (rules.size() == 0) {
+                    cout << "{ } ";
+                } else {
+                    cout << "{ ";
+                    for(set<string>::iterator i = rules.begin(); i != rules.end(); i++) {
+                        cout << *i << " ";
+                    }
+                    cout << "} ";
+                }
+            }
+            cout << endl;
+        }
+    }
 };
 
-struct cells {
-    vector<cell> v;
-    vector <int> deleteList;
-    int n;
-    int m;
-};
+class ChinaWall {
+public:
+    // фирма - набор объектов
+    vector<set<int>> firms;
 
-string ruleSetGen() {
-    string M = "rw";
-    int n = pow(2, M.size());
-    static vector <string> fullRuleSet;
-    if (fullRuleSet.size() == 0) {
-        for (int i = 0; i < n; i++) {
-            string buff = "";
-            for (int j = 0; j < M.size(); j++) {
-                if (i & (1 << j)) {
-                    buff += M[j];
-                }
-            }
-            fullRuleSet.push_back(buff);
-        }
-        fullRuleSet[0] = "_";
-    }
-    string ruleSet = fullRuleSet[rand() % 4];
-    return ruleSet;
-}
+    // конфликт интересов - набор фирм
+    vector<set<int>> iterestConflicts;
 
-void output(cells Cells) {
-    cout << endl << "( subject object rule )" << endl;
-    cout << endl;
-    for (int i = 0; i < Cells.v.size(); i++) {
-        cout << Cells.v[i].subj_i+1 << " " << Cells.v[i].obj_j + 1 << " " << Cells.v[i].value << endl;
-    }
-    cout << endl;
-}
+    // история запросов для субъектов - список из последовательностей запросов каждого субъекта
+    // запрос - индекс объекта + тип запроса
+    vector<vector<pair<int, string>>> accessSubjectHistory;
 
-void clearEmpty(cells& Cells) {
-    for (int d = 0; d < Cells.v.size(); d++) {
-        if (Cells.v[d].value == "") {
-            Cells.v.erase(Cells.v.begin() + d);
-        }
-    }
-}
+    // история запросов для объектов - список из последовательностей запросов каждого объекта
+    // запрос - индекс субъекта + тип запроса
+    vector<vector<pair<int, string>>> accessObjectHistory;
 
-void changeRule(cells& Cells) {
-    cout << "Edit cell" << endl;
-    int act, i, j;
-    cout << "delete - 1, add - 2" << endl;
-    cin >> act;
-    string rule;
-    cout << "Rule Subject Object" << endl;
-    cin >> rule >> i >> j;
-    i--; j--;
+private:
+    vector<string> split(string line) {
+        vector<string> result = vector<string>();
 
-    bool f = false;
-    for (int d = 0; d < Cells.v.size(); d++) {
-        if (Cells.v[d].subj_i == i && Cells.v[d].obj_j == j && act == 1) {
-            string res = rule;
-            for (int inputInd = 0; inputInd < res.size(); inputInd++) {
-                for (int nowInd = 0; nowInd < Cells.v[d].value.size(); nowInd++) {
-                    if (res[inputInd] == Cells.v[d].value[nowInd]) {
-                        Cells.v[d].value = Cells.v[d].value.substr(0, nowInd) + Cells.v[d].value.substr(nowInd + 1, Cells.v[d].value.size() - nowInd - 1);
-                        break;
-                    }
-                }
-            }
-            f = true;
-            break;
-        }
-        if (Cells.v[d].subj_i == i && Cells.v[d].obj_j == j && act == 2) {
-            string res = rule;
-            for (int inputInd = 0; inputInd < res.size(); inputInd++) {
-                bool f = true;
-                for (int nowInd = 0; nowInd < Cells.v[d].value.size(); nowInd++) {
-                    if (res[inputInd] == Cells.v[d].value[nowInd]) {
-                        f = false;
-                        break;
-                    }
-                }
-                if (f) {
-                    Cells.v[d].value += res[inputInd];
-                }
-            }
-            f = true;
-            break;
-        }
-    }
-    if (!f && act == 2 && Cells.n > i && find(Cells.deleteList.begin(), Cells.deleteList.end(), i) == Cells.deleteList.end()) {
-        cell temp;
-        temp.subj_i = i;
-        temp.obj_j = j;
-        temp.value = rule;
-        Cells.v.push_back(temp);
-    } else {
-        cout << "Failed performing command" << endl;
-    }
-}
-
-void insertNewSubj(cells& Cells) {
-    cell temp;
-    temp.subj_i = Cells.n;
-    Cells.n += 1;
-    cout << "New Object Index: " << Cells.n << endl;
-}
-
-void deleteSubj(cells& Cells) {
-    int del_subj_i;
-    cout << "Object Index: " << endl;
-    cin >> del_subj_i;
-    del_subj_i--;
-
-    bool isOneOrMore = false;
-    bool finded = true;
-    while (finded) {
-        finded = false;
-        for (int i = 0; i < Cells.v.size(); i++) {
-            if (Cells.v[i].subj_i == del_subj_i) {
-                finded = true;
-                Cells.v.erase(Cells.v.begin() + i);
-                isOneOrMore = true;
+        for(int i = 0; i < line.size(); i++) {
+            if(line[i] == ' ') {
+                result.push_back(line.substr(0, i));
+                vector<string> tail = split(line.substr(i + 1, line.size() - i - 1));
+                result.insert(result.end(), tail.begin(), tail.end());
                 break;
             }
         }
+
+        if (result.size() == 0) {
+            result.insert(result.begin(), line);
+        }
+
+        return result;
     }
-    
-    if (!isOneOrMore) {
-        cout << "Failed finding object" << endl;
-    } else {
-        Cells.deleteList.push_back(del_subj_i);
-    }
-}
 
-void task4(cells& Cells) {
-    int max_index_i = -1;
-    for (int i = 0; i < Cells.v.size(); i++)
-        if (Cells.v[i].subj_i > max_index_i)
-            max_index_i = Cells.v[i].subj_i;
-    max_index_i++;
-    cout << "Matrix Size (n x m) :" << max_index_i << "x" << Cells.m << endl;
-    cout << "Cells:" << max_index_i * Cells.m << endl;
-    cout << "Filled Cells:" << Cells.v.size() << endl;
-    float all = max_index_i * Cells.m;
-    float items_size = Cells.v.size();
-    cout << "Filled status:" << float((items_size / all) * 100) << "%" << endl;
-}
+    int getInterestGroup(int forObject) {
+        int firm = getFirm(forObject);
 
-void task5(cells& Cells) {
-    cout << "Object index: " << endl;
-    int obj_index;
-    cin >> obj_index;
-    obj_index--;
-
-    vector <int> answer = vector <int>();
-    for (int i = 0; i < Cells.v.size(); i++)
-    {
-        if (!(find(answer.begin(), answer.end(), Cells.v[i].subj_i) != answer.end()) && Cells.v[i].obj_j == obj_index)
-            answer.push_back(Cells.v[i].subj_i);
-    }
-    cout << "Subjects with access to the object: " << endl;
-    for (int i = 0; i < answer.size(); i++) {
-        cout << answer[i] << endl;
-    }
-}
-
-cells getRazrMatr() {
-    int n = rand() % 10 + 2; // число субъектов(программ обработчиков) n
-    int m = rand() % 10 + 2; // число объектов(содержат информацию) m
-
-    cells Cells;
-    Cells.v = vector<cell>();
-    Cells.deleteList = vector<int>();
-    Cells.n = n;
-    Cells.m = m;
-
-    for (int i = 0; i < n; i++) // строки-субъекты
-    {
-        for (int j = 0; j < m; j++) // столбцы-объекты
-        {
-            string temp_RW = ruleSetGen();
-            if (temp_RW != "_") {
-                cell temp_item;
-                temp_item.subj_i = i;
-                temp_item.obj_j = j;
-                temp_item.value = temp_RW;
-                Cells.v.push_back(temp_item);
+        for(int i = 0; i < iterestConflicts.size(); i++) {
+            if(iterestConflicts[i].contains(firm)) {
+                return i;
             }
         }
+
+        return -1;
+    };
+
+    int getFirm(int forObject) {
+        for(int i = 0; i < firms.size(); i++) {
+            if (firms[i].contains(forObject)) {
+                return i;
+            }
+        }
+        return -1;
     }
-    return Cells;
-}
 
-void doInterpretationLoop(cells Items) {
-    cout << "<< Commands List >>" << endl;
-    cout << "0 - Exit" << endl;
-    cout << "1 - Edit Cell" << endl;
-    cout << "2 - Add new Subject" << endl;
-    cout << "3 - Delete Subject" << endl;
-    cout << "4 - Filled Status(total/stored)" << endl;
-    cout << "5 - Subjects with access to the Object X" << endl;
+    void printFirmObjects(int firmIndex) {
+        for(set<int>::iterator i = firms[firmIndex].begin(); i != firms[firmIndex].end(); i++) {
+            cout << *i << ", ";
+            i++;
+        }
+        cout << endl;
+    }
 
-    int Inp;
-    do {
-        cout << "Command: ";
-        cin >> Inp;
-        if (Inp == 1) {
-            changeRule(Items);
+    void printReportForSubject(int subjectIndex) {
+        for(int i = 0; i < accessSubjectHistory[subjectIndex].size(); i++) {
+            cout << "access " << accessSubjectHistory[subjectIndex][i].second << " with object " << accessSubjectHistory[subjectIndex][i].first << " in firm " << getFirm(accessSubjectHistory[subjectIndex][i].first);
         }
-        if (Inp == 2) {
-            insertNewSubj(Items);
+    }
+
+    void printReportForObject(int objectIndex) {
+        for(int i = 0; i < accessObjectHistory[objectIndex].size(); i++) {
+            cout << "access " << accessObjectHistory[objectIndex][i].second << " with object " << accessObjectHistory[objectIndex][i].first << " in firm " << getFirm(accessObjectHistory[objectIndex][i].first);
         }
-        if (Inp == 3) {
-            deleteSubj(Items);
-        }
-        if (Inp == 4) {
-            task4(Items);
-        }
-        if (Inp == 5) {
-            task5(Items);
+    }
+
+    bool canRead(int subjectIndex, int objectIndex) {
+        int interestGroup = getInterestGroup(objectIndex);
+        int objectFirm = getFirm(objectIndex);
+
+        set<int> accessGroups = set<int>();
+        set<int> firmGroups = set<int>();
+
+        for(int i = 0; i < accessSubjectHistory[subjectIndex].size(); i++) {
+            accessGroups.insert(getInterestGroup(accessSubjectHistory[subjectIndex][i].first));
+            firmGroups.insert(getFirm(accessSubjectHistory[subjectIndex][i].first));
         }
 
-        clearEmpty(Items);
-        output(Items);
-    } while (Inp != 0);
-}
+        return !accessGroups.contains(interestGroup) || firmGroups.contains(objectFirm);
+    }
 
+    bool canWrite(int subjectIndex, int objectIndex) {
+        int objectFirm = getFirm(objectIndex);
+        int objectInterest = getInterestGroup(objectIndex);
+        bool isReadFromAnoutherFirm = false;
 
-int main(int argc, const char * argv[]) {
-//    srand(time(0));
+        set<int> readedFirms = set<int>();
+
+        for(int i = 0; i < accessSubjectHistory[subjectIndex].size(); i++) {
+            if (accessSubjectHistory[subjectIndex][i].second == "r" &&
+                getFirm(accessSubjectHistory[subjectIndex][i].first) != objectFirm &&
+                getInterestGroup(accessSubjectHistory[subjectIndex][i].first) == objectInterest) {
+                isReadFromAnoutherFirm = true;
+                break;
+            }
+        }
+
+        return canRead(subjectIndex, objectIndex) && !isReadFromAnoutherFirm;
+    }
+
+    void read(int subjectIndex, int objectIndex) {
+        if (canRead(subjectIndex, objectIndex)) {
+            accessSubjectHistory[subjectIndex].push_back(pair<int, string>(objectIndex, "r"));
+            accessObjectHistory[objectIndex].push_back(pair<int, string>(subjectIndex, "r"));
+            cout << "accepted" << endl;
+        } else {
+            cout << "refused" << endl;
+        }
+    }
+
+    void write(int subjectIndex, int objectIndex) {
+        if (canWrite(subjectIndex, objectIndex)) {
+            accessSubjectHistory[subjectIndex].push_back(pair<int, string>(objectIndex, "w"));
+            accessObjectHistory[objectIndex].push_back(pair<int, string>(subjectIndex, "w"));
+            cout << "accepted" << endl;
+        } else {
+            cout << "refused" << endl;
+        }
+    }
+
+public:
+    ChinaWall(int objCount, int subjCount, int firmCount, int interCount) {
+        this->firms = vector<set<int>>(firmCount, set<int>());
+        this->iterestConflicts = vector<set<int>>(interCount, set<int>());
+
+        this->accessSubjectHistory = vector<vector<pair<int, string>>>(subjCount);
+        this->accessObjectHistory = vector<vector<pair<int, string>>>(objCount);
+    }
+
+    void execute(string command) {
+        vector<string> words = split(command);
+
+        if (words[0] == "start") {
+            accessSubjectHistory = vector<vector<pair<int, string>>>(accessSubjectHistory.size());
+            accessObjectHistory = vector<vector<pair<int, string>>>(accessObjectHistory.size());
+        } else if (words[0] == "read") {
+            int subjectIndex = stoi(words[1]);
+            int objectIndex = stoi(words[2]);
+            read(subjectIndex, objectIndex);
+        } else if (words[0] == "write") {
+            int subjectIndex = stoi(words[1]);
+            int objectIndex = stoi(words[2]);
+            write(subjectIndex, objectIndex);
+        } else if (words[0] == "report_subject") {
+            int subjectIndex = stoi(words[1]);
+            printReportForSubject(subjectIndex);
+        } else if (words[0] == "report_object") {
+            int objectIndex = stoi(words[1]);
+            printReportForObject(objectIndex);
+        } else if (words[0] == "brief_case") {
+            int firmIndex = stoi(words[1]);
+            printFirmObjects(firmIndex);
+        } else {
+            cout << "invalid command" << endl;
+        }
+
+        cout << endl;
+    }
+};
+
+int main() {
+
+    ChinaWall wall = ChinaWall(6, 1, 3, 2); // objectCount, subjectCount, firmCount, conflictoOfInterestCount
     
-    cells Items = getRazrMatr();
-    output(Items);
+    // firms 0: { 0, 1, 2 }
+    wall.firms[0].insert(0);
+    wall.firms[0].insert(1);
+    wall.firms[0].insert(2);
 
-    doInterpretationLoop(Items);
+    // firms 1: { 3, 4}
+    wall.firms[1].insert(3);
+    wall.firms[1].insert(4);
+
+    // firms 2: { 5 }
+    wall.firms[2].insert(5);
+
+    //interest conflicts 0: { f0, f1 }
+    wall.iterestConflicts[0].insert(0);
+    wall.iterestConflicts[0].insert(1);
+
+    //interest conflicts 1: { f2 }
+    wall.iterestConflicts[1].insert(2);
+
+    // reading test
+    
+    cout << "test 1:" << endl;
+    // subjIndex - objIndex
+    wall.execute("read 0 0"); // accepted
+    wall.execute("read 0 3"); // error - object is in different firm and in confict of interest
+    wall.execute("read 0 5"); // accepted - different conflict of interest
+
+    cout << "test 2:" << endl;
+    wall.execute("start");
+    wall.execute("read 0 3"); // accepted
+    wall.execute("read 0 4"); // accepted - conflict of interests but same firm
+
+    cout << "test 3:" << endl;
+    wall.execute("start");
+    wall.execute("write 0 0"); // ок
+    wall.execute("write 0 1"); // ок - объект в той же фирме
+    wall.execute("write 0 3"); // ошибка - объект в другой фирме и в том же конфликте интересов
+    wall.execute("write 0 5"); // ок - объект в другой фирме, но в другом конфликте интересов
+
     return 0;
 }

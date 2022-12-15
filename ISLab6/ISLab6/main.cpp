@@ -23,15 +23,31 @@ void printVector(vector<int> vect) {
     cout << endl;
 }
 
+void print3DArray(vector<vector<vector<int>>> array3d) {
+    for(int x = 0; x < array3d.size(); x++) {
+        for(int y = 0; y < array3d[x].size(); y++) {
+            cout << "( ";
+            for(int z = 0; z < array3d[x][y].size(); z++) {
+                cout << array3d[x][y][z];
+                if (z != array3d[x][y].size() - 1) {
+                    cout << ", ";
+                }
+            }
+            cout << " )  ";
+        }
+        cout << endl;
+    }
+}
+
 vector<vector<vector<int>>> writeCorrectRights(vector<vector<vector<int>>> megamatrix, vector<int> ls, vector<int> lo, int n, int m) {
     vector<vector<vector<int>>> newMatrix = megamatrix;
     for(int i = 0; i < n; i++) {
         for(int j = 0; j < m; j++) {
             vector<int> rw = {0, 0};
-            if (ls[i] > lo[j]) {
+            if (ls[i] >= lo[j]) {
                 rw[0] = 1;
             }
-            if (ls[i] < lo[j]) {
+            if (ls[i] <= lo[j]) {
                 rw[1] = 1;
             }
             newMatrix[j][i] = rw;
@@ -45,7 +61,7 @@ vector<vector<vector<int>>> writeRightsA(vector<vector<vector<int>>> megamatrix,
     for(int i = 0; i < n; i++) {
         for(int j = 0; j < m; j++) {
             int first = rand() % 2;
-            int second = rand() % 2;
+            int second = first == 0 ? 1 : rand() % 2;
             newMatrix[j][i] = {first, second};
         }
     }
@@ -118,11 +134,12 @@ void lab6task2() {
     int m = 2;
     vector<vector<vector<int>>> A;
     A = generateInput(n, m, true);
+    print3DArray(A);
     createLsLo(A, n, m);
 }
 
 int main(int argc, const char * argv[]) {
-    lab6task1();
+//    lab6task1();
     lab6task2();
     return 0;
 }
