@@ -162,7 +162,7 @@ std::string SHA256::toString(const uint8_t * digest) {
 
 int main(int argc, const char * argv[]) {
     SHA256 sha;
-    sha.update("Something");
+    sha.update("Hello World");
     uint8_t * digest = sha.digest();
     
     std::cout << SHA256::toString(digest) << std::endl;
